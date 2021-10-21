@@ -52,7 +52,9 @@ extern void blake3_hasher_update(blake3_hasher *self, const void *input,
  * Initialize a hasher.
  */
 lean_obj_res lean_blake3_initialize() {
-  return lean_io_result_mk_ok(lean_box(0));
+  blake3_hasher *a = malloc(sizeof(blake3_hasher));
+  blake3_hasher_init(a);
+  return lean_alloc_external(get_blake3_hasher_class(), a);
 }
 
 /**
@@ -70,4 +72,11 @@ lean_obj_res lean_blake3_hasher_update(lean_obj_arg self, b_lean_obj_arg input,
   blake3_hasher_update(lean_get_external_data(a), lean_sarray_cptr(input),
                        input_len);
   return a;
+}
+
+lean_obj_res lean_blake3_hasher_finalize(lean_obj_arg self, size_t len) {
+  lean_object *out = lean_alloc_sarray(1, len, len);
+  lean_object *a = lean_ensure_exclusive_blake3_hasher(self);
+  blake3_hasher_finalize(lean_get_external_data(a), lean_sarray_cptr(out), len);
+  return out;
 }
