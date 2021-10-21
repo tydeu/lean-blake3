@@ -16,13 +16,16 @@ BLAKE3_CC_FLAGS := -DBLAKE3_NO_SSE2 -DBLAKE3_NO_SSE41 -DBLAKE3_NO_AVX2 -DBLAKE3_
 
 # OS Config
 
-OS_NAME := ${OS}
-ifneq ($(OS_NAME),Windows_NT)
+ifeq (${OS},Windows_NT)
+OS_NAME := Windows
+else
 OS_NAME := $(shell uname -s)
 endif
 
-ifeq (${OS_NAME},Windows_NT)
+ifeq (${OS_NAME},Windows)
 SHARED_LIB_EXT := dll
+else ifeq (${OS_NAME},Darwin)
+SHARED_LIB_EXT := dylib
 else
 SHARED_LIB_EXT := so
 endif
@@ -39,11 +42,13 @@ OUT=build
 PKG=Blake3
 SHIM_LIB=blake3-shim.a
 PLUGIN_LIB=${PKG}.${SHARED_LIB_EXT}
-BLAKE3_LIB=libblake3-c.a
+BLAKE3_LIB=libblake3.a
 
 # Build Targets
 
-all: blake3-plugin blake3-lean
+all: blake3
+
+blake3: blake3-plugin blake3-lean
 
 blake3-c: ${BLAKE3_LIB}
 
@@ -53,7 +58,7 @@ blake3-plugin: ${OUT}/${PLUGIN_LIB}
 
 blake3-lean: ${OUT}/src/${PKG}.olean
 
-test: ${OUT}/${PLUGIN_LIB} ${OUT}/src/${PKG}.olean
+test: blake3
 	LEAN_PATH=${OUT}/src ${LEAN} --plugin ${OUT}/${PLUGIN_LIB} tests/Tests/HashString.lean
 
 clean:
