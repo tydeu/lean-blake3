@@ -30,7 +30,6 @@ endif
 # General Config
 
 CC=cc
-CXX=c++
 AR=ar
 
 # Project Settings
@@ -44,7 +43,7 @@ BLAKE3_LIB=libblake3-c.a
 
 # Build Targets
 
-all: blake3-plugin
+all: blake3-plugin blake3-lean
 
 blake3-c: ${BLAKE3_LIB}
 
